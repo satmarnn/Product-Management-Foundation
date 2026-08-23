@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteLogic Velocity — Final Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Lato:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07162C;
+    --fg:#ffffff;
+    --muted:rgba(255,255,255,0.68);
+    --muted-2:rgba(255,255,255,0.5);
+    --orange:#fb923c;
+    --cyan:#22d3ee;
+    --teal:#34d399;
+    --blue:#60a5fa;
+    --violet:#a78bfa;
+    --pink:#f472b6;
+    --card-border:rgba(251,146,60,0.25);
+    --eyebrow:#fdba74;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Lato', sans-serif;
+    scroll-snap-type:y mandatory;
+    overflow-y:scroll;
+    height:100vh;
+  }
+  ::selection{ background:var(--orange); color:#07162C; }
+
+  h1,h2,h3,h4{ font-family:'Poppins', sans-serif; margin:0; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--eyebrow);
+    font-size:12.5px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:20px; height:1px;
+    background:var(--eyebrow);
+    display:inline-block;
+  }
+
+  section{
+    min-height:100vh;
+    width:100%;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:70px 8vw 60px;
+    position:relative;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  section .slide-inner{
+    max-width:1360px;
+    margin:0 auto;
+    width:100%;
+  }
+  .bg-glow{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:0.5;
+    z-index:0;
+  }
+  section > .slide-inner{ position:relative; z-index:1; }
+
+  /* progress bar */
+  #progress{
+    position:fixed; top:0; left:0; height:3px;
+    background:linear-gradient(90deg, var(--orange), var(--pink));
+    width:0%;
+    z-index:100;
+    transition:width .15s ease-out;
+  }
+
+  /* dot nav */
+  #dotnav{
+    position:fixed;
+    right:24px; top:50%;
+    transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:14px;
+    z-index:100;
+  }
+  #dotnav button{
+    width:9px; height:9px; border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    border:1px solid rgba(255,255,255,0.3);
+    cursor:pointer;
+    padding:0;
+    transition:all .25s ease;
+    position:relative;
+  }
+  #dotnav button.active{
+    background:var(--orange);
+    border-color:var(--orange);
+    transform:scale(1.35);
+    box-shadow:0 0 12px rgba(251,146,60,0.6);
+  }
+  #dotnav button .tip{
+    position:absolute; right:20px; top:50%; transform:translateY(-50%);
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    background:#0d2140; border:1px solid var(--card-border);
+    color:var(--fg); padding:4px 9px; border-radius:6px;
+    white-space:nowrap; opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  #dotnav button:hover .tip{ opacity:1; }
+
+  /* generic card */
+  .card{
+    background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:24px 26px;
+  }
+  .card-shadow{
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.55);
+  }
+  .tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    font-weight:500;
+  }
+
+  a.btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:linear-gradient(135deg, var(--orange), #f97316);
+    color:#1a0f04;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:13px;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:10px;
+    box-shadow:0 12px 30px -10px rgba(251,146,60,0.5);
+    transition:transform .2s ease;
+  }
+  a.btn:hover{ transform:translateY(-2px); }
+  a.btn.ghost{
+    background:transparent;
+    border:1px solid var(--card-border);
+    color:var(--fg);
+    box-shadow:none;
+  }
+
+  p{ margin:0; }
+
+  /* ===== COVER ===== */
+  #cover{
+    background:
+      radial-gradient(circle at 15% 20%, rgba(251,146,60,0.18), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(34,211,238,0.14), transparent 50%),
+      var(--bg);
+    justify-content:center;
+    align-items:flex-start;
+  }
+  #cover h1{
+    font-size:clamp(38px, 5.4vw, 74px);
+    font-weight:900;
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    max-width:920px;
+    margin:22px 0 26px;
+    background:linear-gradient(120deg, #fff 40%, var(--orange));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #cover .pitch{
+    font-size:clamp(17px, 1.6vw, 22px);
+    color:var(--muted);
+    max-width:640px;
+    line-height:1.55;
+    margin-bottom:44px;
+  }
+  #cover .meta{
+    display:flex; flex-wrap:wrap; gap:14px 28px;
+    align-items:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--muted-2);
+    margin-bottom:34px;
+  }
+  #cover .links{ display:flex; gap:14px; flex-wrap:wrap; }
+
+  /* ===== Strategy (Slide 5) ===== */
+  #strategy .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:26px;
+    margin-top:34px;
+    align-items:stretch;
+  }
+  #strategy .hook-card{ border-color:rgba(96,165,250,0.35); }
+  #strategy .value-card{ border-color:rgba(52,211,153,0.35); }
+  #strategy .card h3{ font-size:15px; margin-bottom:12px; }
+  #strategy .card p{ font-size:15.5px; line-height:1.6; color:var(--fg); }
+  #strategy .hypothesis{
+    margin-top:24px;
+    border-radius:18px;
+    padding:28px 30px;
+    background:linear-gradient(135deg, rgba(251,146,60,0.14), rgba(167,139,250,0.10));
+    border:1px solid var(--card-border);
+  }
+  #strategy .hypothesis .label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--orange); margin-bottom:12px; display:block; font-weight:600;
+  }
+  #strategy .hypothesis p{ font-size:16.5px; line-height:1.7; color:#fff; }
+
+  /* ===== Research (Slide 6) ===== */
+  #research .rgrid{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:26px;
+    margin-top:30px;
+  }
+  #research .field{ margin-bottom:16px; }
+  #research .field .k{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:5px; font-weight:600;
+  }
+  #research .field .v{ font-size:14px; line-height:1.55; color:var(--muted); }
+  #research .steps{ list-style:none; margin:0; padding:0; counter-reset:step; }
+  #research .steps li{
+    counter-increment:step;
+    display:flex; gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    font-size:13.5px; color:var(--muted);
+  }
+  #research .steps li:last-child{ border-bottom:none; }
+  #research .steps li::before{
+    content:counter(step);
+    flex-shrink:0;
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(251,146,60,0.18); color:var(--orange);
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:600;
+  }
+  #research .quote{
+    margin-top:14px;
+    border-left:2px solid var(--pink);
+    padding:10px 0 10px 16px;
+    font-style:italic;
+    font-size:13.5px;
+    color:#fff;
+  }
+  #research .journey{
+    margin-top:30px;
+    padding:22px 24px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  #research .journey .step{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    padding:9px 13px;
+    border-radius:9px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  #research .journey .step.misery{
+    background:rgba(244,114,182,0.15);
+    border-color:rgba(244,114,182,0.4);
+    color:var(--pink);
+    font-weight:600;
+  }
+  #research .journey .step.solve{
+    background:rgba(52,211,153,0.15);
+    border-color:rgba(52,211,153,0.4);
+    color:var(--teal);
+    font-weight:600;
+  }
+  #research .journey .arrow{ color:var(--muted-2); }
+
+  /* ===== Blueprint (Slide 7) ===== */
+  #blueprint .cols{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-top:24px;
+  }
+  #blueprint .col h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  #blueprint .col.now h4{ color:var(--orange); }
+  #blueprint .col.next h4{ color:var(--blue); }
+  #blueprint .col.later h4{ color:var(--muted-2); }
+  #blueprint .col{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:16px 18px;
+    min-height:150px;
+  }
+  #blueprint .item{
+    background:rgba(255,255,255,0.04);
+    border-radius:9px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+  #blueprint .item b{ color:#fff; display:block; margin-bottom:3px; font-size:13px;}
+  #blueprint .prd{
+    margin-top:26px;
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  #blueprint .prd .card p{ font-size:13.5px; line-height:1.6; color:var(--muted); }
+  #blueprint .prd .metricrow{ display:flex; gap:12px; margin-top:14px; flex-wrap:wrap; }
+  #blueprint .metricbox{
+    flex:1; min-width:180px;
+    background:rgba(255,255,255,0.04);
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  #blueprint .metricbox .k{ font-family:'IBM Plex Mono', monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:var(--eyebrow); margin-bottom:4px;}
+  #blueprint .metricbox .v{ font-size:12.5px; color:var(--muted); line-height:1.5;}
+
+  /* ===== Validation (Slide 8) ===== */
+  #validation .expcard{
+    margin-top:26px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  #validation .expcard .full{ grid-column:1 / -1; }
+  #validation .avcard h4{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    margin-bottom:10px; color:var(--muted-2);
+  }
+  #validation .avcard.control{ border-color:rgba(244,114,182,0.3); }
+  #validation .avcard.variant{ border-color:rgba(52,211,153,0.3); }
+  #validation .avcard.control h4{ color:var(--pink); }
+  #validation .avcard.variant h4{ color:var(--teal); }
+  #validation .avcard p{ font-size:13.5px; color:var(--muted); line-height:1.55; }
+  #validation .statrow{ display:flex; gap:14px; flex-wrap:wrap; }
+  #validation .stat{
+    flex:1; min-width:150px;
+    background:rgba(255,255,255,0.04);
+    border-radius:10px; padding:12px 14px;
+  }
+  #validation .stat .num{ font-family:'IBM Plex Mono', monospace; font-size:19px; font-weight:600; color:var(--orange);}
+  #validation .stat .lab{ font-size:11px; color:var(--muted-2); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px;}
+  #validation .rules{ display:flex; gap:12px; flex-wrap:wrap; margin-top:6px;}
+  #validation .rule{
+    flex:1; min-width:200px;
+    border-radius:10px; padding:12px 14px;
+    font-size:12.5px; line-height:1.5; color:var(--muted);
+  }
+  #validation .rule.ship{ background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3);}
+  #validation .rule.iterate{ background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3);}
+  #validation .rule.kill{ background:rgba(244,114,182,0.1); border:1px solid rgba(244,114,182,0.3);}
+  #validation .rule b{ display:block; color:#fff; font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; margin-bottom:4px; }
+
+  /* ===== Launch (Slide 9) ===== */
+  #launch .lgrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+    margin-top:26px;
+  }
+  #launch .pillrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .pill{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    padding:7px 13px;
+    border-radius:999px;
+    border:1px solid;
+  }
+  .pill.orange{ color:var(--orange); border-color:rgba(251,146,60,0.4); background:rgba(251,146,60,0.1); }
+  .pill.cyan{ color:var(--cyan); border-color:rgba(34,211,238,0.4); background:rgba(34,211,238,0.1); }
+  .pill.violet{ color:var(--violet); border-color:rgba(167,139,250,0.4); background:rgba(167,139,250,0.1); }
+  .pill.blue{ color:var(--blue); border-color:rgba(96,165,250,0.4); background:rgba(96,165,250,0.1); }
+  #launch .metricsdash{ margin-top:22px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  #launch .mtile{ padding:16px 16px; }
+  #launch .mtile .k{ font-family:'IBM Plex Mono', monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted-2); margin-bottom:6px;}
+  #launch .mtile .name{ font-size:13.5px; font-weight:700; margin-bottom:6px; }
+  #launch .mtile .target{ font-size:12px; color:var(--muted); line-height:1.5; }
+  #launch .badsignal{
+    margin-top:18px;
+    border-radius:14px;
+    padding:16px 20px;
+    background:rgba(244,114,182,0.1);
+    border:1px solid rgba(244,114,182,0.4);
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  #launch .badsignal .ico{ font-size:20px; }
+  #launch .badsignal p{ font-size:13px; color:#fff; line-height:1.6; }
+  #launch .badsignal b{ color:var(--pink); }
+
+  /* ===== Story (Slide 10) ===== */
+  #story .sgrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+    margin-top:28px;
+  }
+  #story .list{ list-style:none; margin:0; padding:0; }
+  #story .list li{
+    font-size:13px; line-height:1.6; color:var(--muted);
+    padding:10px 0 10px 20px;
+    position:relative;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  #story .list li:last-child{ border-bottom:none; }
+  #story .list li::before{
+    content:'';
+    position:absolute; left:0; top:16px;
+    width:7px; height:7px; border-radius:50%;
+  }
+  #story .friction li::before{ background:var(--pink); }
+  #story .learn li::before{ background:var(--cyan); }
+  #story .aha{
+    margin-top:22px;
+    grid-column:1/-1;
+    border-radius:18px;
+    padding:26px 28px;
+    background:linear-gradient(135deg, rgba(167,139,250,0.16), rgba(96,165,250,0.08));
+    border:1px solid rgba(167,139,250,0.4);
+  }
+  #story .aha .label{ font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--violet); margin-bottom:10px; display:block; font-weight:600; }
+  #story .aha p{ font-size:15px; line-height:1.7; color:#fff; }
+  #story .next{
+    margin-top:18px;
+    grid-column:1/-1;
+    display:flex; align-items:center; gap:12px;
+    font-size:13.5px; color:var(--muted);
+  }
+  #story .next b{ color:var(--teal); font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
+
+  /* ===== Thank you ===== */
+  #end{
+    align-items:center; justify-content:center; text-align:center;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(251,146,60,0.14), transparent 55%),
+      var(--bg);
+  }
+  #end h2{ font-size:clamp(32px,4.4vw,54px); font-weight:800; margin-bottom:16px; }
+  #end .sub{ color:var(--muted); font-size:16px; margin-bottom:34px; }
+  #end .links{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:26px; }
+  #end .cohort{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; color:var(--muted-2);
+    border:1px solid rgba(255,255,255,0.15);
+    padding:6px 14px; border-radius:999px;
+    margin-bottom:30px;
+  }
+  #end .submit{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:14px 26px; border-radius:999px;
+    background:linear-gradient(135deg, var(--teal), var(--cyan));
+    color:#052018; font-weight:700; font-family:'IBM Plex Mono', monospace; font-size:13px;
+    box-shadow:0 16px 40px -14px rgba(52,211,153,0.5);
+  }
+
+  @media (max-width: 900px){
+    #strategy .grid, #research .rgrid, #blueprint .cols, #blueprint .prd,
+    #validation .expcard, #launch .lgrid, #launch .metricsdash, #story .sgrid{
+      grid-template-columns:1fr !important;
+    }
+    #dotnav{ right:10px; }
+    section{ padding:60px 6vw 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<nav id="dotnav"></nav>
+
+<!-- ============ COVER ============ -->
+<section id="cover" data-title="Cover">
+  <div class="slide-inner">
+    <span class="eyebrow">Product School · Final Project</span>
+    <h1>RouteLogic Velocity<br>A Frontline-First Dispatch View</h1>
+    <p class="pitch">Strip the admin clutter into one real-time dispatch view so fleet coordinators reroute in seconds, not screens.</p>
+    <div class="meta">
+      <span>Sathyakumari · Product Management Cohort · Aug 2026</span>
+    </div>
+    <div class="links">
+      <a class="btn" href="https://github.com/satmarnn/Product-Management-Foundation" target="_blank" rel="noopener">↗ Repository</a>
+      <a class="btn ghost" href="https://github.com/satmarnn/Product-Management-Foundation/blob/main/04-roadmap/routelogic-velocity-roadmap.html" target="_blank" rel="noopener">View Prototype</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 5 — STRATEGY ============ -->
+<section id="strategy" data-title="05 · Strategy">
+  <div class="slide-inner">
+    <span class="eyebrow">05 · Strategy</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">Problem, Value, Hypothesis</h2>
+    <div class="grid">
+      <div class="card card-shadow hook-card">
+        <h3 class="mono" style="color:var(--blue);">PROBLEM HOOK</h3>
+        <p>We must solve the administrative burden to reduce the support task for frontline coordinators.</p>
+      </div>
+      <div class="card card-shadow value-card">
+        <h3 class="mono" style="color:var(--teal);">VALUE PROPOSITION</h3>
+        <p>Velocity gives coordinators one focused, real-time view — live vehicle status, exceptions, and one-tap reroute — so the tool becomes the fastest way to run the shift instead of the slowest.</p>
+      </div>
+    </div>
+    <div class="hypothesis">
+      <span class="label">Data-Backed Hypothesis</span>
+      <p>Based on reassignments taking 8–15 minutes to reach drivers with no notification, status updates lagging 20–60 minutes behind reality, and CSAT scores of 2.2 (Compliance) and 1.3 (Reporting) for Coordinators — I believe that real-time dashboard reflection and instant reassignment notifications for Coordinators and Drivers will result in on-time deliveries, avoided reroutes, and more completed deliveries per day, as measured by a 50–75% change in Assign Routes &amp; Compliance Checks. We will protect the benchmark timeframe for Assigned Route and Compliance Checks, and make a go/no-go decision after optimizing the workflow and resolving the underlying communication-speed gap.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 6 — RESEARCH ============ -->
+<section id="research" data-title="06 · Research">
+  <div class="slide-inner">
+    <span class="eyebrow">06 · Research</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">Competitive Analysis &amp; Journey Map</h2>
+    <div class="rgrid">
+      <div class="card card-shadow">
+        <div class="field">
+          <div class="k" style="color:var(--orange);">Role</div>
+          <div class="v">The Dispatcher — coordinates driver routes and monitors delivery status from a central dashboard.</div>
+        </div>
+        <div class="field">
+          <div class="k" style="color:var(--orange);">Goal</div>
+          <div class="v">Wants to trust that what the dashboard shows reflects reality, so they can coordinate the fleet without double-checking everything manually.</div>
+        </div>
+        <div class="field">
+          <div class="k" style="color:var(--pink);">Moment of Misery</div>
+          <div class="v">Reassignments take 8–15 minutes to reach drivers with no notification. Status updates lag 20–60 minutes behind reality. The burden isn't paperwork — it's manually re-verifying a system that's supposed to do the verifying for them.</div>
+        </div>
+        <div class="field">
+          <div class="k">External Tool / Workaround</div>
+          <div class="v">The dispatcher doesn't escalate through official channels — they maintain a running WhatsApp group with drivers and treat that as the real system of record, not the dashboard.</div>
+        </div>
+        <div class="quote">"Every reassignment now costs two actions instead of one, and every status check requires the dispatcher to hold two competing pictures of reality in their head and manually decide which to believe."</div>
+      </div>
+      <div class="card card-shadow">
+        <div class="k" style="color:var(--cyan); font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">The Manual Process</div>
+        <ol class="steps">
+          <li>Reassign the route in-app, as designed.</li>
+          <li>Assume it hasn't landed — no push notification, 8–15 min delay (BUG-2044).</li>
+          <li>Re-send the same instruction via WhatsApp, duplicating the action.</li>
+          <li>Wait for a reply, not a status change — the dashboard can't be trusted to confirm receipt.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="card journey">
+      <span class="k mono" style="width:100%; color:var(--muted-2); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Journey Map</span>
+      <span class="step">Shift starts</span><span class="arrow">→</span>
+      <span class="step">Open console</span><span class="arrow">→</span>
+      <span class="step">Hunt admin-heavy tabs for live status</span><span class="arrow">→</span>
+      <span class="step misery">Give up, switch to spreadsheet / phone</span><span class="arrow">→</span>
+      <span class="step solve">Velocity: live dispatch board on open</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 7 — BLUEPRINT ============ -->
+<section id="blueprint" data-title="07 · Blueprint">
+  <div class="slide-inner">
+    <span class="eyebrow">07 · Blueprint</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">Roadmap &amp; PRD Highlights</h2>
+    <div class="cols">
+      <div class="col now">
+        <h4>● Now — Pilot (4wks, 3 accounts)</h4>
+        <div class="item"><b>B6 · Driver Alert Notifications</b>Closes the 8–15 min reassignment gap — the #1 reason dispatchers work around the system. Event-driven, no backend change.</div>
+      </div>
+      <div class="col next">
+        <h4>● Next — GA (Wks 5–8)</h4>
+        <div class="item"><b>B4 · Mobile-First Coordinator Dashboard</b>Addresses the core friction long-term — parked, not killed; too large for a 4-week pilot.</div>
+      </div>
+      <div class="col later">
+        <h4>● Later — Backlog</h4>
+        <div class="item"><b>B3 · Shift Handoff Wizard</b>Adjacent friction, not the reassignment/status gap.</div>
+        <div class="item"><b>B9 · Compliance Audit Trail Export</b>Useful, low-cost, not tied to the moment of misery.</div>
+      </div>
+    </div>
+    <div class="prd">
+      <div class="card card-shadow">
+        <h3 class="mono" style="color:var(--orange); font-size:13px; margin-bottom:10px;">PRD · DISPATCH DASHBOARD OPTIMIZER</h3>
+        <p><b style="color:#fff;">Vision:</b> The moment a dispatcher reassigns a route, the driver already knows — and the dashboard shows in real time exactly how fresh, or stale, every piece of status data is.</p>
+        <p style="margin-top:10px;"><b style="color:#fff;">Press release:</b> RouteLogic closes the gap between what dispatchers see and what's actually happening on the road — no more guessing, no more calling to confirm.</p>
+        <div class="metricrow">
+          <div class="metricbox"><div class="k">Success Metric</div><div class="v">Reduction in workaround usage — fewer calls, texts, side-channel tracking.</div></div>
+          <div class="metricbox"><div class="k">Guardrail</div><div class="v">Assigned Route &amp; Compliance Check timeframes must not regress beyond benchmark.</div></div>
+        </div>
+      </div>
+      <div class="card card-shadow" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <h3 class="mono" style="color:var(--teal); font-size:13px; margin-bottom:10px;">MUST HAVE (MoSCoW)</h3>
+          <p style="font-size:13px; line-height:1.6; color:var(--muted);">Real-time reassignment push to driver, and real-time staleness reflection on the dashboard — the entire reason the feature exists.</p>
+        </div>
+        <a class="btn" style="margin-top:20px; align-self:flex-start;" href="https://github.com/satmarnn/Product-Management-Foundation/blob/main/04-roadmap/routelogic-velocity-roadmap.html" target="_blank" rel="noopener">↗ View Prototype</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 8 — VALIDATION ============ -->
+<section id="validation" data-title="08 · Validation">
+  <div class="slide-inner">
+    <span class="eyebrow">08 · Validation</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">Experimentation Plan</h2>
+    <div class="card card-shadow" style="margin-top:22px;">
+      <div class="k mono" style="color:var(--eyebrow); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Hypothesis</div>
+      <p style="font-size:14px; line-height:1.65; color:var(--muted);">Real-Time Reassignment Push for the Dispatcher will result in a reduction in median reassignment-to-driver-acknowledgment time from 8–15min to 4–8min (≥3min improvement), measured by device-level notification-received timestamps vs. reassignment-confirmation timestamps, within 20 days or the pre-registered event-sample window, whichever is later.</p>
+    </div>
+    <div class="expcard">
+      <div class="card avcard control">
+        <h4>Control (A)</h4>
+        <p>Reassignments take 8–15 minutes to reach drivers with no notification. Status updates lag 20–60 minutes behind reality.</p>
+      </div>
+      <div class="card avcard variant">
+        <h4>Variant (B)</h4>
+        <p>Push notification sent the instant a reassignment is confirmed. Propagation infra changes only — status lag and dashboard UI remain untouched.</p>
+      </div>
+      <div class="full statrow">
+        <div class="stat"><div class="num">8–15min</div><div class="lab">Baseline</div></div>
+        <div class="stat"><div class="num">≥3min</div><div class="lab">MDE</div></div>
+        <div class="stat"><div class="num">15 / arm</div><div class="lab">Sample Size</div></div>
+        <div class="stat"><div class="num">50/50</div><div class="lab">Split</div></div>
+        <div class="stat"><div class="num">p&lt;0.05</div><div class="lab">Significance</div></div>
+      </div>
+      <div class="full card" style="background:rgba(255,255,255,0.03);">
+        <div class="k mono" style="color:var(--pink); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Guardrails</div>
+        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Status-lag metric must show no significant degradation. Driver app crash rate and notification opt-out rate must stay within an agreed tolerance (±2pp) of Control.</p>
+      </div>
+      <div class="full rules">
+        <div class="rule ship"><b>Ship</b>Primary passes at p&lt;0.05 AND both guardrails hold.</div>
+        <div class="rule iterate"><b>Iterate</b>Primary not yet significant within window — extend, don't conclude null.</div>
+        <div class="rule kill"><b>Hold / Investigate</b>Primary passes but a guardrail fails — do not ship on primary alone.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 9 — LAUNCH ============ -->
+<section id="launch" data-title="09 · Launch">
+  <div class="slide-inner">
+    <span class="eyebrow">09 · Launch</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">GTM Strategy &amp; Success Metrics</h2>
+    <div class="lgrid">
+      <div class="card card-shadow">
+        <div class="k mono" style="color:var(--orange); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Goal · Conversion</div>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.6;">Reduce dispatcher reliance on the WhatsApp workaround by closing the reassignment-notification gap — cut reassignment-to-acknowledgment time to ≤5min median, with no regression in status-lag accuracy or app stability, within the quarter.</p>
+      </div>
+      <div class="card card-shadow">
+        <div class="k mono" style="color:var(--blue); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;">Audience · Wave 1</div>
+        <p style="font-size:13.5px; color:var(--muted); line-height:1.6;">Dispatchers at enterprise accounts already flagged for renewal risk — where the trust gap's business cost is most acute and measurable.</p>
+      </div>
+    </div>
+    <div class="pillrow">
+      <span class="pill orange">Tier: M · Targeted</span>
+      <span class="pill cyan">Owned · In-App Dashboard</span>
+      <span class="pill violet">Owned · CS/AM-Led Briefing</span>
+      <span class="pill blue">Owned · Direct Stakeholder Outreach</span>
+    </div>
+    <div class="metricsdash">
+      <div class="card mtile">
+        <div class="k">Leading</div>
+        <div class="name" style="color:var(--orange);">Reassignment→Ack Time</div>
+        <div class="target">Median ≤5min, down from 8–15min baseline, sustained at Wave 1 scale.</div>
+      </div>
+      <div class="card mtile">
+        <div class="k">Lagging</div>
+        <div class="name" style="color:var(--teal);">WhatsApp Duplication Rate</div>
+        <div class="target">Measurable decline from baseline, tracked via self-report + CS debrief.</div>
+      </div>
+      <div class="card mtile">
+        <div class="k">Qualitative</div>
+        <div class="name" style="color:var(--violet);">Renewal-Risk Sentiment</div>
+        <div class="target">AM-reported evidence that stakeholders connect the change to their complaint.</div>
+      </div>
+    </div>
+    <div class="badsignal">
+      <div class="ico">⚠</div>
+      <p><b>Bad signal to watch:</b> reassignment time hits the ≤5min target and holds — but the WhatsApp-duplication rate doesn't move. That combination looks like success on the dashboard while the actual goal is silently failing — a signal to hold Wave 2 and accelerate Stage 2 (confirmation-loop) scoping, not proceed on the primary metric alone.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 10 — STORY ============ -->
+<section id="story" data-title="10 · Story">
+  <div class="slide-inner">
+    <span class="eyebrow">10 · Story</span>
+    <h2 style="font-size:clamp(26px,3vw,38px); font-weight:800; margin-top:14px;">Reflection &amp; Next Steps</h2>
+    <div class="sgrid">
+      <div class="card card-shadow">
+        <h3 class="mono" style="color:var(--pink); font-size:13px; margin-bottom:12px;">FRICTION POINTS</h3>
+        <ul class="list friction">
+          <li>The Variant field in the A/B brief was a copy-paste error identical to Control — a small slip that would have invalidated the whole experiment if it had shipped unreviewed.</li>
+          <li>The guardrail and primary metric started conflated ("protect &lt;8–15min" restating the improvement target) — the same root habit later showed up as sample-size and event-definition ambiguity.</li>
+          <li>Section-by-section GTM building without a running document let ownership drift from names back to roles by the final pressure-test.</li>
+        </ul>
+      </div>
+      <div class="card card-shadow">
+        <h3 class="mono" style="color:var(--cyan); font-size:13px; margin-bottom:12px;">KEY LEARNINGS</h3>
+        <ul class="list learn">
+          <li>Speed metrics and trust metrics are not the same metric — the single most repeated failure mode across the whole exercise.</li>
+          <li>Deliberately deferring a feature (the confirmation loop) creates a predictable, nameable downstream risk — worth pre-writing, not discovering later.</li>
+          <li>A role is not an owner. Any document that outlives one working session needs a check for whether accountability degraded into abstraction.</li>
+        </ul>
+      </div>
+      <div class="aha">
+        <span class="label">Aha! Moment</span>
+        <p>A technically successful launch and a strategically failed one can look identical on the primary metric. Reassignment time hitting ≤5min and holding is unambiguous good news on its own — but paired with a flat WhatsApp-duplication rate, it's evidence the deferred confirmation-loop work isn't optional-later, it's blocking-now. The combination of metrics, not any single one, tells the true story — the moment this stopped being "did the feature ship correctly" and became "did the feature do what it was for."</p>
+      </div>
+      <div class="next">
+        <b>Next</b>
+        <span>For B2B tools, the workflow at the moment of decision beats feature breadth. Next: instrument the reroute flow and A/B test exception-alert timing to cut time-to-action further.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THANK YOU ============ -->
+<section id="end" data-title="Submit">
+  <div class="slide-inner">
+    <span class="eyebrow" style="justify-content:center;">Thank You</span>
+    <h2 style="margin-top:16px;">RouteLogic Velocity</h2>
+    <p class="sub">A frontline-first dispatch view, built from research to roadmap to launch.</p>
+    <div class="links">
+      <a class="btn" href="https://github.com/satmarnn/Product-Management-Foundation" target="_blank" rel="noopener">↗ Repository</a>
+      <a class="btn ghost" href="https://github.com/satmarnn/Product-Management-Foundation/blob/main/04-roadmap/routelogic-velocity-roadmap.html" target="_blank" rel="noopener">View Prototype</a>
+    </div>
+    <span class="cohort mono">Sathyakumari · Product Management Cohort · Aug 2026</span><br>
+    <span class="submit">✓ Submit to the Learning Platform</span>
+  </div>
+</section>
+
+<script>
+  const sections = Array.from(document.querySelectorAll('section'));
+  const dotnav = document.getElementById('dotnav');
+  const progress = document.getElementById('progress');
+
+  sections.forEach((sec, i) => {
+    const btn = document.createElement('button');
+    btn.setAttribute('aria-label', sec.dataset.title || ('Slide ' + (i+1)));
+    const tip = document.createElement('span');
+    tip.className = 'tip';
+    tip.textContent = sec.dataset.title || ('Slide ' + (i+1));
+    btn.appendChild(tip);
+    btn.addEventListener('click', () => sec.scrollIntoView({behavior:'smooth'}));
+    dotnav.appendChild(btn);
+  });
+  const dots = Array.from(dotnav.children);
+
+  function currentIndex(){
+    let idx = 0, best = Infinity;
+    sections.forEach((sec,i) => {
+      const d = Math.abs(sec.getBoundingClientRect().top);
+      if(d < best){ best = d; idx = i; }
+    });
+    return idx;
+  }
+
+  function updateUI(){
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (max > 0 ? (scrollTop/max)*100 : 0) + '%';
+    const idx = currentIndex();
+    dots.forEach((d,i) => d.classList.toggle('active', i===idx));
+  }
+
+  document.addEventListener('scroll', () => window.requestAnimationFrame(updateUI), {passive:true});
+  window.addEventListener('resize', updateUI);
+  updateUI();
+
+  document.addEventListener('keydown', (e) => {
+    const idx = currentIndex();
+    if(e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown'){
+      e.preventDefault();
+      if(sections[idx+1]) sections[idx+1].scrollIntoView({behavior:'smooth'});
+    } else if(e.key === 'ArrowUp' || e.key === 'PageUp'){
+      e.preventDefault();
+      if(sections[idx-1]) sections[idx-1].scrollIntoView({behavior:'smooth'});
+    } else if(e.key === 'Home'){
+      e.preventDefault();
+      sections[0].scrollIntoView({behavior:'smooth'});
+    } else if(e.key === 'End'){
+      e.preventDefault();
+      sections[sections.length-1].scrollIntoView({behavior:'smooth'});
+    } else if(e.key === 'Escape'){
+      document.activeElement && document.activeElement.blur();
+    }
+  });
+</script>
+
+</body>
+</html>
